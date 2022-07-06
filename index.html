@@ -7,7 +7,51 @@
     <title>Javascrip threads</title>
     <script src="index.js" defer></script>
 </head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-size: x-large;
+    }
+
+    body {
+        background-color: rgba(43, 116, 63, 0.29);
+        height: 100vh;
+    }
+
+    .display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .main {
+        letter-spacing: 2px;
+        margin: 10px 0;
+    }
+
+    .main p {
+        margin-top: 10px;
+    }
+    
+    .creditos {
+        margin-top: 20px;
+    }
+</style>
 <body>
-    <h2>Uma aplicação de threads em JavaScript!</h2>
+    <section class="main display">
+        <h2>Uma aplicação de threads em JavaScript!</h2>
+        <p>Essa aplicação realiza o calculo de multiplicação entre duas matrizes.</p>
+        <p>Abra o console do seu navegador e observe a tabela gerada e os dados brutos.</p>
+    </section>
+    <section class="creditos display">
+        <p>Desenvolvido por:</p>
+        <ol>
+            <li>Douglas</li>
+            <li>João Vitor</li>
+        </ol>
+    </section>
 </body>
 </html>
