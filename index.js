@@ -4,9 +4,9 @@ let arraysThreads = [];
 // Variáveis de controle para geração dos valores das matrizes.
 
 // Intervalo de numeros gerados (sem limite estipulado).
-const intervaloNumerico = 100000000;
+const intervaloNumerico = 10;
 // Quantidade de que cada conjunto terá (maior intervalo alcançado: 172).
-const quantidadeNumeros = 172;
+const quantidadeNumeros = 10;
 //  Quantidade de linhas de uma matriz.
 const quantidadeValoresMatriz = quantidadeNumeros;
 
@@ -18,6 +18,22 @@ let matrizFinal = [];
 // Variáveis contendo as matrizes.
 const matrizA = geraValoresMatriz(quantidadeValoresMatriz);
 const matrizB = geraValoresMatriz(quantidadeValoresMatriz);
+
+// Gerando os web workers e enviando os dados das matrizes para o calculo.
+geraWorkers();
+// Escutando a resposta dos workers.
+escutaWorkers();
+
+// Exibição do resultado final.
+setTimeout(() =>{
+    console.log("Valores na matriz desordenada: ");
+    console.table(matrizDesordenada);
+    console.log('\n');
+    console.log("Valores das matrizes resultantes: ");
+    console.table(matrizDesordenada.map((array) => {
+        return array.matrizResultante;
+    }));
+}, 3000);
 
 // Gera números aleatórios para povoar as matrizes.
 function geraValoresConjuntoRandomicos(intervalo, quantidade) {
@@ -42,30 +58,29 @@ function geraValoresMatriz(quantidade) {
     return matriz;
 }
 
-// Gerando os web workers e enviando os dados das matrizes para o calculo.
-for(let count = 0; count < quantidadeValoresMatriz; count++) {
-    arraysThreads[count] = new Worker('worker.js');
-    arraysThreads[count].postMessage({
-        parteMatrizA: matrizA[count],
-        matrizB,
-        id: count
+function geraWorkers() {
+    for(let count = 0; count < quantidadeValoresMatriz; count++) {
+        // novo web worker
+        arraysThreads[count] = new Worker('worker.js');
+        // Enviando dados para a thread.
+        arraysThreads[count].postMessage({
+            parteMatrizA: matrizA[count],
+            matrizB,
+            id: count
+        });
+    }
+}
+
+function escutaWorkers() {
+    arraysThreads.forEach((worker) => {
+        // Capturando mensagem devolvida.
+        worker.onmessage = (message) => {
+            const { data } = message;
+            // Salvando em um array.
+            matrizDesordenada.push(data);
+            // Eliminando o worker.
+            worker.terminate();
+        }
     });
 }
 
-// Escutando a resposta dos workers.
-arraysThreads.forEach((worker) => {
-    // Capturando mensagem devolvida.
-    worker.onmessage = (message) => {
-        const { data } = message;
-        // Salvando em um array.
-        matrizDesordenada.push(data);
-        // Eliminando o worker.
-        worker.terminate();
-    }
-});
-
-setTimeout(() =>{
-    console.table(matrizDesordenada);
-    matrizFinal = matrizDesordenada.sort((a, b) => a -b);
-    // console.table(matrizFinal);
-}, 3000);
