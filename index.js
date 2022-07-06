@@ -2,9 +2,18 @@
 let arraysThreads = [];
 
 // Variáveis de controle para geração dos valores das matrizes.
-const intervaloNumerico = 10;
-const quantidadeNumeros = 5;
-const quantidadeValoresMatriz = 5;
+
+// Intervalo de numeros gerados (sem limite estipulado).
+const intervaloNumerico = 100000000;
+// Quantidade de que cada conjunto terá (maior intervalo alcançado: 172).
+const quantidadeNumeros = 172;
+//  Quantidade de linhas de uma matriz.
+const quantidadeValoresMatriz = quantidadeNumeros;
+
+// Armazena os valores acumulados do calculo realizado pelos workers.
+const matrizDesordenada = [];
+// Armazena os valores ordenados na matriz desordenada.
+let matrizFinal = [];
 
 // Variáveis contendo as matrizes.
 const matrizA = geraValoresMatriz(quantidadeValoresMatriz);
@@ -33,79 +42,30 @@ function geraValoresMatriz(quantidade) {
     return matriz;
 }
 
-// Gerando as threads.
-const work1 = new Worker('worker.js');
-const work2 = new Worker('worker.js');
-const work3 = new Worker('worker.js');
-const work4 = new Worker('worker.js');
-const work5 = new Worker('worker.js');
-
-work1.postMessage({
-    parteMatrizA: matrizA[0],
-    matrizB
-});
-
-work2.postMessage({
-    parteMatrizA: matrizA[1],
-    matrizB
-});
-
-work3.postMessage({
-    parteMatrizA: matrizA[2],
-    matrizB
-});
-
-work4.postMessage({
-    parteMatrizA: matrizA[3],
-    matrizB
-});
-
-work5.postMessage({
-    parteMatrizA: matrizA[4],
-    matrizB
-});
-
-work1.onmessage = function(message) {
-    const { data } = message;
-    console.log(message);
+// Gerando os web workers e enviando os dados das matrizes para o calculo.
+for(let count = 0; count < quantidadeValoresMatriz; count++) {
+    arraysThreads[count] = new Worker('worker.js');
+    arraysThreads[count].postMessage({
+        parteMatrizA: matrizA[count],
+        matrizB,
+        id: count
+    });
 }
 
-work2.onmessage = function(message) {
-    const { data } = message;
-    console.log(message);
-}
+// Escutando a resposta dos workers.
+arraysThreads.forEach((worker) => {
+    // Capturando mensagem devolvida.
+    worker.onmessage = (message) => {
+        const { data } = message;
+        // Salvando em um array.
+        matrizDesordenada.push(data);
+        // Eliminando o worker.
+        worker.terminate();
+    }
+});
 
-work3.onmessage = function(message) {
-    const { data } = message;
-    console.log(message);
-}
-
-work4.onmessage = function(message) {
-    const { data } = message;
-    console.log(message);
-}
-
-work5.onmessage = function(message) {
-    const { data } = message;
-    console.log(message);
-}
-    
-
-
-// Forma de se instanciar threads no JS.
-// const worker = new Worker('worker.js');
-
-// const matrizPosicao0 = matrizA[0];
-// console.log(matrizPosicao0)
-
-// worker.postMessage({
-//     parteMatrizA: matrizA[0],
-//     matrizB
-// });
-
-// worker.onmessage = function(message) {
-//     console.log(message.data);
-// }
-
-
-console.log("Fim do script!")
+setTimeout(() =>{
+    console.table(matrizDesordenada);
+    matrizFinal = matrizDesordenada.sort((a, b) => a -b);
+    // console.table(matrizFinal);
+}, 3000);
